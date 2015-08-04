@@ -15,6 +15,7 @@ rescue
   # ignore setup error on Win or similar platform which doesn't support signal
 end
 require 'cool.io'
+require 'fluent/ntime'
 require 'fluent/env'
 require 'fluent/version'
 require 'fluent/log'
@@ -33,4 +34,3 @@ require 'fluent/input'
 require 'fluent/output'
 require 'fluent/filter'
 require 'fluent/match'
-require 'fluent/ntime'
