@@ -21,4 +21,9 @@ class Fluent::NTime
   def to_msgpack_ext
     [@sec, @nsec].pack('LL')
   end
+
+  def self.now
+    time = Time.now
+    new(time.sec, time.nsec)
+  end
 end
