@@ -60,7 +60,7 @@ class FileOutputTest < Test::Unit::TestCase
 
   def test_default_localtime
     d = create_driver(%[path #{TMP_DIR}/out_file_test])
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     with_timezone('Asia/Taipei') do
       d.emit({"a"=>1}, time)
@@ -72,7 +72,7 @@ class FileOutputTest < Test::Unit::TestCase
   def test_format
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
     d.emit({"a"=>1}, time)
     d.emit({"a"=>2}, time)
 
@@ -88,7 +88,7 @@ class FileOutputTest < Test::Unit::TestCase
       timezone Asia/Taipei
     ]
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     d.emit({"a"=>1}, time)
     d.expect_format %[2011-01-02T21:14:15+08:00\ttest\t{"a":1}\n]
@@ -101,7 +101,7 @@ class FileOutputTest < Test::Unit::TestCase
       timezone -03:30
     ]
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     d.emit({"a"=>1}, time)
     d.expect_format %[2011-01-02T09:44:15-03:30\ttest\t{"a":1}\n]
@@ -138,7 +138,7 @@ class FileOutputTest < Test::Unit::TestCase
   def test_write
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
     d.emit({"a"=>1}, time)
     d.emit({"a"=>2}, time)
 
@@ -153,7 +153,7 @@ class FileOutputTest < Test::Unit::TestCase
   def test_write_with_format_json
     d = create_driver [CONFIG, 'format json', 'include_time_key true', 'time_as_epoch'].join("\n")
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
     d.emit({"a"=>1}, time)
     d.emit({"a"=>2}, time)
 
@@ -165,7 +165,7 @@ class FileOutputTest < Test::Unit::TestCase
   def test_write_with_format_ltsv
     d = create_driver [CONFIG, 'format ltsv', 'include_time_key true'].join("\n")
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
     d.emit({"a"=>1}, time)
     d.emit({"a"=>2}, time)
 
@@ -177,7 +177,7 @@ class FileOutputTest < Test::Unit::TestCase
   def test_write_with_format_single_value
     d = create_driver [CONFIG, 'format single_value', 'message_key a'].join("\n")
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
     d.emit({"a"=>1}, time)
     d.emit({"a"=>2}, time)
 
@@ -189,7 +189,7 @@ class FileOutputTest < Test::Unit::TestCase
   def test_write_path_increment
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
     d.emit({"a"=>1}, time)
     d.emit({"a"=>2}, time)
     formatted_lines = %[2011-01-02T13:14:15Z\ttest\t{"a":1}\n] + %[2011-01-02T13:14:15Z\ttest\t{"a":2}\n]
@@ -214,7 +214,7 @@ class FileOutputTest < Test::Unit::TestCase
       append true
     ]
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
     d.emit({"a"=>1}, time)
     d.emit({"a"=>2}, time)
     formatted_lines = %[2011-01-02T13:14:15Z\ttest\t{"a":1}\n] + %[2011-01-02T13:14:15Z\ttest\t{"a":2}\n]
@@ -243,7 +243,7 @@ class FileOutputTest < Test::Unit::TestCase
     begin
       d.instance.start
       10.times { sleep 0.05 }
-      time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+      time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
       es = Fluent::OneEventStream.new(time, {"a"=>1})
       d.instance.emit('tag', es, Fluent::NullOutputChain.instance)
 
@@ -267,7 +267,7 @@ class FileOutputTest < Test::Unit::TestCase
         time_slice_format %Y-%m-%d-%H
         utc true
       ])
-      time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+      time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
       d.emit({"a"=>1}, time)
       # FileOutput#write returns path
       path = d.run
@@ -281,7 +281,7 @@ class FileOutputTest < Test::Unit::TestCase
         utc true
         append true
       ])
-      time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+      time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
       d.emit({"a"=>1}, time)
       path = d.run
       assert_equal "#{TMP_DIR}/out_file_test.2011-01-02-13.log", path
@@ -293,7 +293,7 @@ class FileOutputTest < Test::Unit::TestCase
         time_slice_format %Y-%m-%d-%H
         utc true
       ])
-      time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+      time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
       d.emit({"a"=>1}, time)
       path = d.run
       assert_equal "#{TMP_DIR}/out_file_test.2011-01-02-13_0.txt", path
@@ -306,7 +306,7 @@ class FileOutputTest < Test::Unit::TestCase
         utc true
         append true
       ])
-      time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+      time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
       d.emit({"a"=>1}, time)
       path = d.run
       assert_equal "#{TMP_DIR}/out_file_test.2011-01-02-13.txt", path

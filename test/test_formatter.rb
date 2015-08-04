@@ -8,15 +8,15 @@ module FormatterTest
   def time2str(time, localtime = false, format = nil)
     if format
       if localtime
-        Time.at(time).strftime(format)
+        time.to_time.strftime(format)
       else
-        Time.at(time).utc.strftime(format)
+        time.to_time.utc.strftime(format)
       end
     else
       if localtime
-        Time.at(time).iso8601
+        time.to_time.iso8601
       else
-        Time.at(time).utc.iso8601
+        time.to_time.utc.iso8601
       end
     end
   end
@@ -397,7 +397,8 @@ module FormatterTest
     include FormatterTest
 
     def setup
-      @time = Time.new(2014, 9, 27, 0, 0, 0, 0).to_i
+      time = Time.new(2014, 9, 27, 0, 0, 0, 0)
+      @time = Fluent::NTime.from_time(time)
       @fmt  = "%Y%m%d %H%M%z"  # YYYYMMDD HHMM[+-]HHMM
     end
 

@@ -143,7 +143,7 @@ class Writer
       raise ArgumentError, "Input must be a map (got #{record.class})"
     end
 
-    entry = [Time.now.to_i, record]
+    entry = [Fluent::NTime.now, record]
     synchronize {
       unless write_impl([entry])
         # write failed

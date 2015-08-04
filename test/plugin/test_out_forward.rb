@@ -111,7 +111,7 @@ class ForwardOutputTest < Test::Unit::TestCase
 
     d = create_driver(CONFIG + %[flush_interval 1s])
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     records = [
       {"a" => 1},
@@ -142,7 +142,7 @@ class ForwardOutputTest < Test::Unit::TestCase
 
     d = create_driver(CONFIG + %[flush_interval 1s])
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     records = [
       {"a" => 1},
@@ -177,7 +177,7 @@ class ForwardOutputTest < Test::Unit::TestCase
       ack_response_timeout 1s
     ])
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     records = [
       {"a" => 1},
@@ -214,7 +214,7 @@ class ForwardOutputTest < Test::Unit::TestCase
       ack_response_timeout 1s
     ])
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     records = [
       {"a" => 1},
@@ -255,7 +255,7 @@ class ForwardOutputTest < Test::Unit::TestCase
       ack_response_timeout 5s
     ])
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     records = [
       {"a" => 1},

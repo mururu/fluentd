@@ -91,7 +91,7 @@ class RoundRobinOutputTest < Test::Unit::TestCase
   def test_emit
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
     d.run do
       d.emit({"a"=>1}, time)
       d.emit({"a"=>2}, time)
@@ -122,7 +122,7 @@ class RoundRobinOutputTest < Test::Unit::TestCase
   def test_emit_weighted
     d = create_driver(CONFIG_WITH_WEIGHT)
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
     d.run do
       14.times do |i|
         d.emit({"a"=>i}, time)

@@ -9,7 +9,7 @@ module StreamInputTest
   def test_time
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
     Fluent::Engine.now = time
 
     d.expect_emit "tag1", time, {"a"=>1}
@@ -25,7 +25,7 @@ module StreamInputTest
   def test_message
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     d.expect_emit "tag1", time, {"a"=>1}
     d.expect_emit "tag2", time, {"a"=>2}
@@ -40,7 +40,7 @@ module StreamInputTest
   def test_forward
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     d.expect_emit "tag1", time, {"a"=>1}
     d.expect_emit "tag1", time, {"a"=>2}
@@ -57,7 +57,7 @@ module StreamInputTest
   def test_packed_forward
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     d.expect_emit "tag1", time, {"a"=>1}
     d.expect_emit "tag1", time, {"a"=>2}
@@ -74,7 +74,7 @@ module StreamInputTest
   def test_message_json
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     d.expect_emit "tag1", time, {"a"=>1}
     d.expect_emit "tag2", time, {"a"=>2}

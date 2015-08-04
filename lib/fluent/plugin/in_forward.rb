@@ -97,7 +97,7 @@ module Fluent
     private
 
     # message Entry {
-    #   1: long time
+    #   1: [long long] Fluent::Time
     #   2: object record
     # }
     #
@@ -153,8 +153,8 @@ module Fluent
         entries.each {|e|
           record = e[1]
           next if record.nil?
-          time = e[0].to_i
-          time = (now ||= Engine.now) if time == 0
+          time = e[0]
+          time = (time && time != 0) ? Fluent::NTime.new(time) : Engine.now
           es.add(time, record)
         }
         router.emit_stream(tag, es)
@@ -165,7 +165,7 @@ module Fluent
         record = msg[2]
         return if record.nil?
         time = msg[1]
-        time = Engine.now if time == 0
+        time = (time and time != 0) ? Fluent::NTime.new(time) : Engine.now
         router.emit(tag, time, record)
         option = msg[3]
       end

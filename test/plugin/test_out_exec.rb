@@ -29,7 +29,7 @@ class ExecOutputTest < Test::Unit::TestCase
   end
 
   def create_test_case
-    time = Time.parse("2011-01-02 13:14:15").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15"))
     tests = [{"k1"=>"v1","kx"=>"vx"}, {"k1"=>"v2","kx"=>"vx"}]
     return time, tests
   end

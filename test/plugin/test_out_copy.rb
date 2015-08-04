@@ -52,7 +52,7 @@ class CopyOutputTest < Test::Unit::TestCase
   def test_emit
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
     d.emit({"a"=>1}, time)
     d.emit({"a"=>2}, time)
 
@@ -85,7 +85,7 @@ class CopyOutputTest < Test::Unit::TestCase
     d.instance.instance_eval { @outputs = outputs }
 
     es = if defined?(MessagePack::Packer)
-           time = Time.parse("2013-05-26 06:37:22 UTC").to_i
+           time = Fluent::NTime.from_time(Time.parse("2013-05-26 06:37:22 UTC"))
            packer = MessagePack::Packer.new
            packer.pack([time, {"a" => 1}])
            packer.pack([time, {"a" => 2}])
@@ -136,7 +136,7 @@ deep_copy true
   end
 
   def test_one_event
-    time = Time.parse("2013-05-26 06:37:22 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2013-05-26 06:37:22 UTC"))
 
     d = create_event_test_driver(false)
     es = Fluent::OneEventStream.new(time, {"a" => 1})
@@ -158,7 +158,7 @@ deep_copy true
   end
 
   def test_multi_event
-    time = Time.parse("2013-05-26 06:37:22 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2013-05-26 06:37:22 UTC"))
 
     d = create_event_test_driver(false)
     es = Fluent::MultiEventStream.new

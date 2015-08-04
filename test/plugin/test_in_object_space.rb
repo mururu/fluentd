@@ -32,7 +32,7 @@ class ObjectSpaceInputTest < Test::Unit::TestCase
   def test_emit
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15"))
 
     d.expected_emits_length = 2
     d.run

@@ -36,7 +36,7 @@ class ForwardInputTest < Test::Unit::TestCase
   def test_time
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
     Fluent::Engine.now = time
 
     d.expect_emit "tag1", time, {"a"=>1}
@@ -52,7 +52,7 @@ class ForwardInputTest < Test::Unit::TestCase
   def test_message
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     d.expect_emit "tag1", time, {"a"=>1}
     d.expect_emit "tag2", time, {"a"=>2}
@@ -67,7 +67,7 @@ class ForwardInputTest < Test::Unit::TestCase
   def test_forward
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     d.expect_emit "tag1", time, {"a"=>1}
     d.expect_emit "tag1", time, {"a"=>2}
@@ -84,7 +84,7 @@ class ForwardInputTest < Test::Unit::TestCase
   def test_packed_forward
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     d.expect_emit "tag1", time, {"a"=>1}
     d.expect_emit "tag1", time, {"a"=>2}
@@ -101,7 +101,7 @@ class ForwardInputTest < Test::Unit::TestCase
   def test_message_json
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     d.expect_emit "tag1", time, {"a"=>1}
     d.expect_emit "tag2", time, {"a"=>2}
@@ -119,7 +119,7 @@ class ForwardInputTest < Test::Unit::TestCase
       chunk_size_limit 32M
     ])
 
-    time = Time.parse("2014-04-25 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2014-04-25 13:14:15 UTC"))
 
     # generate over 16M chunk
     str = "X" * 1024 * 1024
@@ -150,7 +150,7 @@ class ForwardInputTest < Test::Unit::TestCase
     d = create_driver(CONFIG + %[
       chunk_size_warn_limit 16M
     ])
-    time = Time.parse("2014-04-25 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2014-04-25 13:14:15 UTC"))
 
     # generate over 16M chunk
     str = "X" * 1024 * 1024
@@ -175,7 +175,7 @@ class ForwardInputTest < Test::Unit::TestCase
       chunk_size_limit 32M
     ])
 
-    time = Time.parse("2014-04-25 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2014-04-25 13:14:15 UTC"))
 
     # generate over 32M chunk
     str = "X" * 1024 * 1024
@@ -223,7 +223,7 @@ class ForwardInputTest < Test::Unit::TestCase
   def test_respond_to_message_requiring_ack
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     events = [
       ["tag1", time, {"a"=>1}],
@@ -249,7 +249,7 @@ class ForwardInputTest < Test::Unit::TestCase
   def test_respond_to_forward_requiring_ack
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     events = [
       ["tag1", time, {"a"=>1}],
@@ -276,7 +276,7 @@ class ForwardInputTest < Test::Unit::TestCase
   def test_respond_to_packed_forward_requiring_ack
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     events = [
       ["tag1", time, {"a"=>1}],
@@ -303,7 +303,7 @@ class ForwardInputTest < Test::Unit::TestCase
   def test_respond_to_message_json_requiring_ack
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     events = [
       ["tag1", time, {"a"=>1}],
@@ -329,7 +329,7 @@ class ForwardInputTest < Test::Unit::TestCase
   def test_not_respond_to_message_not_requiring_ack
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     events = [
       ["tag1", time, {"a"=>1}],
@@ -350,7 +350,7 @@ class ForwardInputTest < Test::Unit::TestCase
   def test_not_respond_to_forward_not_requiring_ack
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     events = [
       ["tag1", time, {"a"=>1}],
@@ -373,7 +373,7 @@ class ForwardInputTest < Test::Unit::TestCase
   def test_not_respond_to_packed_forward_not_requiring_ack
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     events = [
       ["tag1", time, {"a"=>1}],
@@ -396,7 +396,7 @@ class ForwardInputTest < Test::Unit::TestCase
   def test_not_respond_to_message_json_not_requiring_ack
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15 UTC"))
 
     events = [
       ["tag1", time, {"a"=>1}],

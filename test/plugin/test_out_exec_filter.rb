@@ -69,7 +69,7 @@ class ExecFilterOutputTest < Test::Unit::TestCase
   def test_emit_1
     d = create_driver
 
-    time = Time.parse("2011-01-02 13:14:15").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15"))
 
     d.run do
       d.emit({"k1"=>1}, time)
@@ -92,7 +92,7 @@ class ExecFilterOutputTest < Test::Unit::TestCase
       num_children 3
     ]
 
-    time = Time.parse("2011-01-02 13:14:15").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15"))
 
     d.run do
       d.emit({"k1"=>1}, time)
@@ -115,7 +115,7 @@ class ExecFilterOutputTest < Test::Unit::TestCase
       num_children 3
     ]
 
-    time = Time.parse("2011-01-02 13:14:15").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15"))
 
     d.run do
       d.emit({"val1"=>"sed-ed value foo"}, time)
@@ -135,7 +135,7 @@ class ExecFilterOutputTest < Test::Unit::TestCase
       num_children 3
     ]
 
-    time = Time.parse("2011-01-02 13:14:15").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15"))
 
     d.run do
       d.emit({"val1"=>"sed-ed value foo"}, time)
@@ -160,7 +160,7 @@ class ExecFilterOutputTest < Test::Unit::TestCase
       num_children 3
     ], 'input.test')
 
-    time = Time.parse("2011-01-02 13:14:15").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15"))
 
     d.run do
       d.emit({"val1"=>"sed-ed value foo"}, time)
@@ -182,7 +182,7 @@ class ExecFilterOutputTest < Test::Unit::TestCase
       tag_key tag
     ], 'input.test')
 
-    time = Time.parse("2011-01-02 13:14:15").to_i
+    time = Fluent::NTime.from_time(Time.parse("2011-01-02 13:14:15"))
 
     d.run do
       d.emit({"message"=>%[{"time":#{time},"tag":"t1","k1":"v1"}]}, time+10)

@@ -31,7 +31,7 @@ class StdoutFilterTest < Test::Unit::TestCase
 
   def test_through_record
     d = create_driver
-    time = Time.now
+    time = Fluent::NTime.now
     filtered = emit(d, {'test' => 'test'}, time)
     assert_equal({'test' => 'test'}, filtered)
   end
@@ -58,7 +58,7 @@ class StdoutFilterTest < Test::Unit::TestCase
 
   def test_output_type_json
     d = create_driver(CONFIG + "\noutput_type json")
-    time = Time.now
+    time = Fluent::NTime.now
     out = capture_log(d) { emit(d, {'test' => 'test'}, time) }
     assert_equal "#{time.localtime} filter.test: {\"test\":\"test\"}\n", out
 
@@ -70,7 +70,7 @@ class StdoutFilterTest < Test::Unit::TestCase
 
   def test_output_type_hash
     d = create_driver(CONFIG + "\noutput_type hash")
-    time = Time.now
+    time = Fluent::NTime.now
     out = capture_log(d) { emit(d, {'test' => 'test'}, time) }
     assert_equal "#{time.localtime} filter.test: {\"test\"=>\"test\"}\n", out
 
@@ -83,7 +83,7 @@ class StdoutFilterTest < Test::Unit::TestCase
   # Use include_time_key to output the message's time
   def test_include_time_key
     d = create_driver(CONFIG + "\noutput_type json\ninclude_time_key true\nutc")
-    time = Time.now
+    time = Fluent::NTime.now
     message_time = Time.parse("2011-01-02 13:14:15 UTC").to_i
     out = capture_log(d) { emit(d, {'test' => 'test'}, message_time) }
     assert_equal "#{time.localtime} filter.test: {\"test\":\"test\",\"time\":\"2011-01-02T13:14:15Z\"}\n", out
@@ -92,7 +92,7 @@ class StdoutFilterTest < Test::Unit::TestCase
   # out_stdout formatter itself can also be replaced
   def test_format_json
     d = create_driver(CONFIG + "\nformat json")
-    time = Time.now
+    time = Fluent::NTime.now
     out = capture_log(d) { emit(d, {'test' => 'test'}, time) }
     assert_equal "{\"test\":\"test\"}\n", out
   end

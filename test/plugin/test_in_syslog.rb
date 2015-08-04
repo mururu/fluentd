@@ -113,7 +113,7 @@ class SyslogInputTest < Test::Unit::TestCase
 
   def test_msg_size_with_json_format
     d = create_driver([CONFIG, 'format json'].join("\n"))
-    time = Time.parse('2013-09-18 12:00:00 +0900').to_i
+    time = Fluent::NTime.from_time(Time.parse('2013-09-18 12:00:00 +0900'))
     tests = ['Hello!', 'Syslog!'].map { |msg|
       event = {'time' => time, 'message' => msg}
       {'msg' => '<6>' + event.to_json + "\n", 'expected' => msg}

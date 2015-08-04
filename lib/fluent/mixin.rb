@@ -34,21 +34,21 @@ module Fluent
       if format
         if localtime
           define_singleton_method(:format_nocache) {|time|
-            Time.at(time).strftime(format)
+            Time.at(time.sec, time.nsec/100).strftime(format)
           }
         else
           define_singleton_method(:format_nocache) {|time|
-            Time.at(time).utc.strftime(format)
+            Time.at(time.sec, time.nsec/100).utc.strftime(format)
           }
         end
       else
         if localtime
           define_singleton_method(:format_nocache) {|time|
-            Time.at(time).iso8601
+            Time.at(time.sec, time.nsec/100).iso8601
           }
         else
           define_singleton_method(:format_nocache) {|time|
-            Time.at(time).utc.iso8601
+            Time.at(time.sec, time.nsec/100).utc.iso8601
           }
         end
       end

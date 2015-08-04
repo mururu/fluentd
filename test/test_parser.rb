@@ -7,9 +7,9 @@ module ParserTest
 
   def str2time(str_time, format = nil)
     if format
-      Time.strptime(str_time, format).to_i
+      Fluent::NTime.from_time(Time.strptime(str_time, format))
     else
-      Time.parse(str_time).to_i
+      Fluent::NTime.from_time(Time.parse(str_time))
     end
   end
 
@@ -118,7 +118,7 @@ module ParserTest
     end
 
     def test_parse_without_time
-      time_at_start = Time.now.to_i
+      time_at_start = Fluent::NTime.now
       text = "tagomori_satoshi tagomoris 34\n"
 
       parser = TextParser::RegexpParser.new(Regexp.new(%q!^(?<name>[^ ]*) (?<user>[^ ]*) (?<age>\d*)$!))
@@ -360,7 +360,7 @@ module ParserTest
     end
 
     def test_parse_without_time
-      time_at_start = Time.now.to_i
+      time_at_start = Fluent::NTime.now
 
       @parser.parse('{"host":"192.168.0.1","size":777,"method":"PUT"}') { |time, record|
         assert time && time >= time_at_start, "parser puts current time without time input"
@@ -475,7 +475,7 @@ module ParserTest
     end
 
     def test_parse_with_time
-      time_at_start = Time.now.to_i
+      time_at_start = Fluent::NTime.now
 
       parser = TextParser::TSVParser.new
       parser.configure('keys' => 'a,b')
@@ -549,7 +549,7 @@ module ParserTest
 
     data('array param' => '["c","d"]', 'string param' => 'c,d')
     def test_parse_without_time(param)
-      time_at_start = Time.now.to_i
+      time_at_start = Fluent::NTime.now
 
       parser = TextParser::CSVParser.new
       parser.configure('keys' => param)
@@ -649,7 +649,7 @@ module ParserTest
     end
 
     def test_parse_without_time
-      time_at_start = Time.now.to_i
+      time_at_start = Fluent::NTime.now
 
       parser = TextParser::LabeledTSVParser.new
       parser.configure({})
@@ -715,7 +715,7 @@ module ParserTest
     end
 
     def test_parse_without_default_time
-      time_at_start = Time.now.to_i
+      time_at_start = Fluent::NTime.now
 
       parser = TextParser::TEMPLATE_REGISTRY.lookup('none').call
       parser.configure({})
