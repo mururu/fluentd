@@ -82,6 +82,11 @@ module Fluent
     def to_i
       @sec
     end
+    alias to_int to_i
+
+    def to_r
+      @sec + Rational(@nsec, 1000000000)
+    end
 
     ## for MessagePackFormatter
     def to_msgpack(io)
