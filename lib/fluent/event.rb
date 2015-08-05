@@ -143,7 +143,7 @@ module Fluent
 
     def each(&block)
       # TODO format check
-      u = Fluent::Engine.msgpack_factory.unpacker
+      unpacker = Fluent::Engine.msgpack_factory.unpacker
       unpacker.feed_each(@data, &block)
       nil
     end
