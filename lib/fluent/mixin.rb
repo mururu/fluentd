@@ -31,24 +31,29 @@ module Fluent
         return
       end
 
+      ## TypeError: can't convert Fluent::NTime into an exact number
       if format
         if localtime
           define_singleton_method(:format_nocache) {|time|
-            Time.at(time).strftime(format)
+            time = time.is_a?(NTime) ? Time.at(time.sec, time.nsec) : Time.at(time)
+            time.strftime(format)
           }
         else
           define_singleton_method(:format_nocache) {|time|
-            Time.at(time).utc.strftime(format)
+            time = time.is_a?(NTime) ? Time.at(time.sec, time.nsec) : Time.at(time)
+            time.utc.strftime(format)
           }
         end
       else
         if localtime
           define_singleton_method(:format_nocache) {|time|
-            Time.at(time).iso8601
+            time = time.is_a?(NTime) ? Time.at(time.sec, time.nsec) : Time.at(time)
+            time.iso8601
           }
         else
           define_singleton_method(:format_nocache) {|time|
-            Time.at(time).utc.iso8601
+            time = time.is_a?(NTime) ? Time.at(time.sec, time.nsec) : Time.at(time)
+            time.utc.iso8601
           }
         end
       end

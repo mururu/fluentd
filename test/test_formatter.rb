@@ -5,18 +5,23 @@ require 'fluent/formatter'
 module FormatterTest
   include Fluent
 
+  ## TypeError: can't convert Fluent::NTime into an exact number
   def time2str(time, localtime = false, format = nil)
     if format
       if localtime
-        Time.at(time).strftime(format)
+        time = time.is_a?(NTime) ? Time.at(time.sec, time.nsec) : Time.at(time)
+        time.strftime(format)
       else
-        Time.at(time).utc.strftime(format)
+        time = time.is_a?(NTime) ? Time.at(time.sec, time.nsec) : Time.at(time)
+        time.utc.strftime(format)
       end
     else
       if localtime
-        Time.at(time).iso8601
+        time = time.is_a?(NTime) ? Time.at(time.sec, time.nsec) : Time.at(time)
+        time.iso8601
       else
-        Time.at(time).utc.iso8601
+        time = time.is_a?(NTime) ? Time.at(time.sec, time.nsec) : Time.at(time)
+        time.utc.iso8601
       end
     end
   end
