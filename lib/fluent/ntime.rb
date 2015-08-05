@@ -31,10 +31,10 @@ module Fluent
       if arg.is_a?(Numeric)
         @sec + arg
       else
-        nsec = @nsec + arg.nsec
-        @sec += arg.sec + nsec / 1000000000
-        @nsec += nsec % 1000000000
-        self
+        ns = @nsec + arg.nsec
+        sec = @sec + arg.sec + ns / 1000000000
+        nsec = ns % 1000000000
+        NTime.new(sec, nsec)
       end
     end
 
@@ -42,10 +42,10 @@ module Fluent
       if arg.is_a?(Numeric)
         @sec - arg
       else
-        nsec = @nsec - arg.nsec
-        @sec += arg.sec + nsec / 1000000000
-        @nsec += nsec % 1000000000
-        self
+        ns = @nsec - arg.nsec
+        sec = @sec - arg.sec + ns / 1000000000
+        nsec = ns % 1000000000
+        NTime.new(sec, nsec)
       end
     end
 
