@@ -120,7 +120,14 @@ module Fluent
 
       if @out_time_key
         if f = @out_time_format
-          @time_parse_proc = Proc.new {|str| Fluent::NanoTime.from_time(Time.strptime(str, f)) }
+          @time_parse_proc =
+            if Strptime.valid_format?(f)
+              ## strptime gem is still experimental!!!
+              strptime = Strptime.new(f)
+              Proc.new { |str| Fluent::NanoTime.from_time(strptime.exec(str)) }
+            else
+              Proc.new {|str| Fluent::NanoTime.from_time(Time.strptime(str, f)) }
+            end
         else
           @time_parse_proc = Proc.new {|str| Fluent::NanoTime.from_time(Time.at(str.to_f)) }
         end

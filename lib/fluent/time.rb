@@ -79,3 +79,10 @@ module Fluent
     end
   end
 end
+
+class Strptime
+  ## strptime gem doesn't support all formats
+  def self.valid_format?(format)
+    format !~ /!%(%%)*%[ACDEFGILOPQRTUVWXZabceghjklprstuvwxyz]/
+  end
+end
