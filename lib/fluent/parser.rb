@@ -60,11 +60,10 @@ module Fluent
         @cache2_time = nil
         @parser =
           if time_format
-            if Strptime.valid_format?(time_format)
-              ## strptime gem is still experimental!!!
+            begin
               strptime = Strptime.new(time_format)
               Proc.new { |value| Fluent::NanoTime.from_time(strptime.exec(value)) }
-            else
+            rescue
               Proc.new { |value| Fluent::NanoTime.from_time(Time.strptime(value, time_format)) }
             end
           else
