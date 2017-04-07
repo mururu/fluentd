@@ -98,7 +98,12 @@ module Fluent
 
     def lookup_name_from_class(klass_or_str)
       klass = if klass_or_str.class == String
-                eval(klass_or_str) # const_get can't handle A::B
+                begin
+                  Object.const_get(klass_or_str)
+                rescue
+                  # ignore anonymous class
+                  return nil
+                end
               else
                 klass_or_str
               end
