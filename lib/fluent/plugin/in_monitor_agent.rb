@@ -307,13 +307,6 @@ module Fluent
       end
     end
 
-    MONITOR_INFO = {
-      'output_plugin' => 'is_a?(::Fluent::Output)', # deprecated. Use plugin_category instead
-      'buffer_queue_length' => '@buffer.queue_size',
-      'buffer_total_queued_size' => '@buffer.total_queued_chunk_size',
-      'retry_count' => '@num_errors',
-    }
-
     def all_plugins
       array = []
 
@@ -406,13 +399,11 @@ module Fluent
       obj['type'] = pe.config['@type'] || pe.config['type']
       obj['config'] = pe.config if opts[:with_config]
 
-      # run MONITOR_INFO in plugins' instance context and store the info to obj
-      MONITOR_INFO.each_pair {|key,code|
-        begin
-          obj[key] = pe.instance_eval(code)
-        rescue
-        end
-      }
+      # plugin metrics
+      obj['output_plugin'] = pe.is_a?(::Fluent::Output) # deprecated. Use plugin_category instead
+      obj['buffer_queue_length'] = pe.instance_eval { @buffer.queue_size }
+      obj['buffer_total_queued_size'] = pe.instance_eval{ @buffer.total_queued_chunk_size }
+      obj['retry_count'] = pe.instance_eval{ @num_errors }
 
       if opts[:with_retry]
         num_errors = pe.instance_variable_get(:@num_errors)
