@@ -101,17 +101,24 @@ module Fluent
     config_param :message_length_limit, :size, default: 2048
     config_param :blocking_timeout, :time, default: 0.5
 
+    config_param :allow_without_pri, :bool, default: false
+    config_param :default_pri, type: :integer, default: 13 # 13 is the default value of rsyslog and syslog-ng
+
     def configure(conf)
       super
+
+      if @default_pri < 0 || @default_pri > 255
+        raise ConfigError, "syslog default pri should be 0 ~ 255"
+      end
 
       if conf.has_key?('format')
         @parser = Plugin.new_parser(conf['format'])
         @parser.configure(conf)
       else
-        conf['with_priority'] = true
+        ## This is confusing when config dump
+        conf['without_priority'] = false
         @parser = TextParser::SyslogParser.new
         @parser.configure(conf)
-        @use_default = true
       end
 
       if @source_hostname_key.nil? && @include_source_host
@@ -120,14 +127,8 @@ module Fluent
     end
 
     def start
-      callback = if @use_default
-                   method(:receive_data)
-                 else
-                   method(:receive_data_parser)
-                 end
-
       @loop = Coolio::Loop.new
-      @handler = listen(callback)
+      @handler = listen(method(:receive_data))
       @loop.attach(@handler)
 
       @thread = Thread.new(&method(:run))
@@ -149,14 +150,20 @@ module Fluent
 
     private
 
-    def receive_data_parser(data, addr)
+    def receive_data(data, addr)
       m = SYSLOG_REGEXP.match(data)
-      unless m
-        log.warn "invalid syslog message: #{data.dump}"
-        return
+      if m
+        pri = m[1].to_i
+        text = m[2]
+      else
+        if @allow_without_pri
+          pri = @default_pri
+          text = data
+        else
+          log.warn "invalid syslog message: #{data.dump}"
+          return
+        end
       end
-      pri = m[1].to_i
-      text = m[2]
 
       @parser.parse(text) { |time, record|
         unless time && record
@@ -164,29 +171,6 @@ module Fluent
           return
         end
 
-        facility = FACILITY_MAP[pri >> 3]
-        priority = PRIORITY_MAP[pri & 0b111]
-
-        record[@priority_key] = priority if @priority_key
-        record[@facility_key] = facility if @facility_key
-        record[@source_hostname_key] = addr[2] if @source_hostname_key
-
-        tag = "#{@tag}.#{facility}.#{priority}"
-        emit(tag, time, record)
-      }
-    rescue => e
-      log.error data.dump, error: e.to_s
-      log.error_backtrace
-    end
-
-    def receive_data(data, addr)
-      @parser.parse(data) { |time, record|
-        unless time && record
-          log.warn "invalid syslog message", data: data
-          return
-        end
-
-        pri = record.delete('pri'.freeze)
         facility = FACILITY_MAP[pri >> 3]
         priority = PRIORITY_MAP[pri & 0b111]
 
