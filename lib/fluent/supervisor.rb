@@ -217,8 +217,18 @@ module Fluent
   end
 
   class Supervisor
-    def self.load_config(path, params = {})
+    def self.read_config_file(path, inline_config, use_v1_config)
+      config_fname = File.basename(path)
+      config_basedir = File.dirname(path)
+      # Assume fluent.conf encoding is UTF-8
+      config_data = File.open(path, "r:utf-8:utf-8") {|f| f.read }
+      if inline_config
+        config_data << "\n" << inline_config.gsub("\\n","\n")
+      end
+      Fluent::Config.parse(config_data, config_fname, config_basedir, use_v1_config)
+    end
 
+    def self.load_config(path, params = {})
       pre_loadtime = 0
       pre_loadtime = params['pre_loadtime'].to_i if params['pre_loadtime']
       pre_config_mtime = nil
@@ -230,18 +240,8 @@ module Fluent
         return params['pre_conf']
       end
 
-      config_fname = File.basename(path)
-      config_basedir = File.dirname(path)
-      # Assume fluent.conf encoding is UTF-8
-      config_data = File.open(path, "r:utf-8:utf-8") {|f| f.read }
-      inline_config = params['inline_config']
-      if inline_config == '-'
-        config_data << "\n" << STDIN.read
-      elsif inline_config
-        config_data << "\n" << inline_config.gsub("\\n","\n")
-      end
-      fluentd_conf = Fluent::Config.parse(config_data, config_fname, config_basedir, params['use_v1_config'])
-      system_config = SystemConfig.create(fluentd_conf)
+      fluentd_conf = read_config_file(path, params[:inline_config_data], params[:use_v1_config])
+      system_config = Fluent::SystemConfig.create(fluentd_conf)
 
       # these params must NOT be configured via system config here.
       # these may be overridden by command line params.
@@ -451,12 +451,26 @@ module Fluent
         log_rotate_size: @log_rotate_size
       )
       @finished = false
+
+      preprocess_inline_config
+    end
+
+    def preprocess_inline_config
+      # read STDIN only once for --inline-config -
+      if @inline_config == '-'
+        @inline_config_data = STDIN.read
+        # overwrite fluenetdargv to pass the worker processes
+        index = $fluentdargv.rindex{|arg| arg == '-i' || arg == '--inline-config'}
+        $fluentdargv[index + 1] = @inline_config_data
+      elsif
+        @inline_config_data = @inline_config
+      end
     end
 
     def run_supervisor
       @log.init(:supervisor, 0)
       show_plugin_config if @show_plugin_config
-      read_config
+      @conf = Fluent::Supervisor.read_config_file(@config_path, @inline_config_data, @use_v1_config)
       set_system_config
       @log.apply_options(format: @system_config.log.format, time_format: @system_config.log.time_format)
 
@@ -508,7 +522,7 @@ module Fluent
                      end
       @log.init(process_type, worker_id)
       show_plugin_config if @show_plugin_config
-      read_config
+      @conf = Fluent::Supervisor.read_config_file(@config_path, @inline_config_data, @use_v1_config)
       set_system_config
       @log.apply_options(format: @system_config.log.format, time_format: @system_config.log.time_format)
 
@@ -587,13 +601,12 @@ module Fluent
       fluentd_spawn_cmd << $0
       fluentd_spawn_cmd += $fluentdargv
       fluentd_spawn_cmd << "--under-supervisor"
-
       $log.info "spawn command to main: ", cmdline: fluentd_spawn_cmd
 
       params = {}
       params['main_cmd'] = fluentd_spawn_cmd
       params['daemonize'] = @daemonize
-      params['inline_config'] = @inline_config
+      params['inline_config_data'] = @inline_config_data
       params['log_path'] = @log_path
       params['log_rotate_age'] = @log_rotate_age
       params['log_rotate_size'] = @log_rotate_size
@@ -735,18 +748,6 @@ module Fluent
       end
 
       exit!(unrecoverable_error ? 2 : 1)
-    end
-
-    def read_config
-      @config_fname = File.basename(@config_path)
-      @config_basedir = File.dirname(@config_path)
-      @config_data = File.open(@config_path, "r:utf-8:utf-8") {|f| f.read }
-      if @inline_config == '-'
-        @config_data << "\n" << STDIN.read
-      elsif @inline_config
-        @config_data << "\n" << @inline_config.gsub("\\n","\n")
-      end
-      @conf = Fluent::Config.parse(@config_data, @config_fname, @config_basedir, @use_v1_config)
     end
 
     def set_system_config
