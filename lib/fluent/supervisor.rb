@@ -39,6 +39,12 @@ end
 
 module Fluent
   module ServerModule
+    attr_accessor :worker_pids
+
+    def initialize
+      @worker_pids = {}
+    end
+
     def before_run
       @start_time = Time.now
 
@@ -163,8 +169,8 @@ module Fluent
         log.reopen!
       end
 
-      if config[:worker_pid]
-        config[:worker_pid].each_value do |pid|
+      if @worker_pids
+        @worker_pids.each_value do |pid|
           Process.kill(:USR1, pid)
           # don't rescue Erro::ESRSH here (invalid status)
         end
@@ -172,9 +178,9 @@ module Fluent
     end
 
     def kill_worker
-      if config[:worker_pid]
-        pids = config[:worker_pid].clone
-        config[:worker_pid].clear
+      if @worker_pids
+        pids = @worker_pids.clone
+        @worker_pids.clear
         pids.each_value do |pid|
           if Fluent.windows?
             Process.kill :KILL, pid
@@ -204,7 +210,7 @@ module Fluent
     end
 
     def after_start
-      (config[:worker_pid] ||= {})[@worker_id] = @pm.pid
+      server.worker_pids[@worker_id] = @pm.pid
     end
   end
 
