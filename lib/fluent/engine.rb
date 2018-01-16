@@ -261,6 +261,13 @@ module Fluent
       @log_event_queue.push([tag, time, record])
     end
 
+    def exec_with_dry_run_mode
+      @dry_run_mode = true
+      yield
+    ensure
+      @dry_run_mode = false
+    end
+
     def worker_id
       return @_worker_id if @_worker_id
       # if ENV doesn't have SERVERENGINE_WORKER_ID, it is a worker under --no-supervisor or in tests

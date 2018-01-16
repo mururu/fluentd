@@ -240,8 +240,38 @@ module Fluent
         return params['pre_conf']
       end
 
-      fluentd_conf = read_config_file(path, params[:inline_config_data], params[:use_v1_config])
-      system_config = Fluent::SystemConfig.create(fluentd_conf)
+      # TODO: error handling
+      original_engine = Fluent::Engine
+      begin
+        fluentd_conf = read_config_file(path, params['inline_config_data'], params['use_v1_config'])
+        system_config = Fluent::SystemConfig.create(fluentd_conf)
+
+        engine = Fluent::EngineClass.new
+        Fluent.class_eval{ remove_const('Engine') }
+        Fluent.const_set('Engine', engine)
+        engine.init(system_config)
+        if params['plugin_dirs']
+          params['plugin_dirs'].each {|dir|
+            if Dir.exist?(dir)
+              dir = File.expand_path(dir)
+              engine.add_plugin_dir(dir)
+            end
+          }
+        end
+        engine.exec_with_dry_run_mode do
+          orig_suppress_config_dump = engine.instance_eval{ orig = @suppress_config_dump; @suppress_config_dump = true; orig }
+          engine.run_configure(fluentd_conf)
+          engine.instance_eval{ @suppress_config_dump = orig_suppress_config_dump }
+        end
+      rescue => e
+        # TODO: Is $log a correct way for logging?
+        $log.error "config reload error: #{e}"
+        $log.error e.backtrace
+        return params['pre_conf']
+      ensure
+        Fluent.class_eval{ remove_const('Engine') }
+        Fluent.const_set('Engine', original_engine)
+      end
 
       # these params must NOT be configured via system config here.
       # these may be overridden by command line params.
@@ -566,19 +596,17 @@ module Fluent
       exit 1
     end
 
-    ## Set Engine's dry_run_mode true to override all target_id of worker sections
     def dry_run
       begin
-        Fluent::Engine.dry_run_mode = true
-        change_privilege
-        init_engine
-        run_configure
+        Fluent::Engine.exec_with_dry_run_mode do
+          change_privilege
+          init_engine
+          run_configure
+        end
       rescue Fluent::ConfigError => e
         $log.error "config error", file: @config_path, error: e
         $log.debug_backtrace
         exit!(1)
-      ensure
-        Fluent::Engine.dry_run_mode = false
       end
     end
 
@@ -613,6 +641,7 @@ module Fluent
       params['chuser'] = @chuser
       params['chgroup'] = @chgroup
       params['use_v1_config'] = @use_v1_config
+      params['plugin_dirs'] = @plugin_dirs
 
       # system config parameters
       params['workers'] = @workers
