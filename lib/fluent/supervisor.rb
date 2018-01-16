@@ -104,6 +104,7 @@ module Fluent
       @rpc_server.mount_proc('/api/config.reload') { |req, res|
         $log.debug "fluentd RPC got /api/config.reload request"
         if Fluent.windows?
+          reload_config
           # restart worker with auto restarting by killing
           kill_worker
         else
@@ -161,6 +162,7 @@ module Fluent
     end
 
     def supervisor_sighup_handler
+      reload_config
       kill_worker
     end
 
