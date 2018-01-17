@@ -500,7 +500,7 @@ module Fluent
     def run_supervisor
       @log.init(:supervisor, 0)
       show_plugin_config if @show_plugin_config
-      @conf = Fluent::Supervisor.read_config_file(@config_path, @inline_config_data, @use_v1_config)
+      read_config
       set_system_config
       @log.apply_options(format: @system_config.log.format, time_format: @system_config.log.time_format)
 
@@ -552,7 +552,7 @@ module Fluent
                      end
       @log.init(process_type, worker_id)
       show_plugin_config if @show_plugin_config
-      @conf = Fluent::Supervisor.read_config_file(@config_path, @inline_config_data, @use_v1_config)
+      read_config
       set_system_config
       @log.apply_options(format: @system_config.log.format, time_format: @system_config.log.time_format)
 
@@ -777,6 +777,10 @@ module Fluent
       end
 
       exit!(unrecoverable_error ? 2 : 1)
+    end
+
+    def read_config
+      @conf = Fluent::Supervisor.read_config_file(@config_path, @inline_config_data, @use_v1_config)
     end
 
     def set_system_config
