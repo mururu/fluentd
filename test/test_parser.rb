@@ -353,6 +353,22 @@ module ParserTest
       assert_equal("%b %d %H:%M:%S", @parser.instance.patterns['time_format'])
     end
 
+    def test_parse_multiline_message
+      message = "line\nbreak"
+      @parser.configure({})
+      @parser.parse("Feb 28 12:00:00 192.168.0.1 fluentd[11111]: #{message}") { |_, record|
+        assert_equal(message, record['message'])
+      }
+    end
+
+    def test_parse_multiline_message_with_priority
+      message = "line\nbreak"
+      @parser.configure('with_priority' => true)
+      @parser.parse("<6>Feb 28 12:00:00 192.168.0.1 fluentd[11111]: #{message}") { |_, record|
+        assert_equal(message, record['message'])
+      }
+    end
+
     def test_parse_without_colon
       @parser.configure({})
       @parser.parse('Feb 28 12:00:00 192.168.0.1 fluentd[11111] [error] Syslog test') { |time, record|
@@ -427,6 +443,27 @@ module ParserTest
         end
         assert_equal(TextParser::SyslogParser::REGEXP_RFC5424,
                      @parser.instance.patterns['format'])
+      end
+
+      def test_parse_multiline_message_with_rfc542_message
+        message = "line\nbreak"
+        @parser.configure(
+          'message_format' => 'rfc5424',
+          'with_priority' => true
+        )
+        text = "<16>1 2017-02-06T13:14:15.003Z 192.168.0.1 fluentd - - - #{message}"
+        @parser.parse(text) do |_, record|
+          assert_equal(message, record['message'])
+        end
+      end
+
+      def test_parse_multiline_message_with_rfc542_message_without_priority
+        message = "line\nbreak"
+        @parser.configure('message_format' => 'rfc5424')
+        text = "2017-02-06T13:14:15.003Z 192.168.0.1 fluentd - - - #{message}"
+        @parser.parse(text) do |_, record|
+          assert_equal(message, record['message'])
+        end
       end
 
       def test_parse_with_rfc5424_message_without_time_format
